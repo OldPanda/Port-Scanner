@@ -157,7 +157,7 @@ void build_dns_header(struct DNS_HEADER *dns_header) {
 results tcp_scan(char *ip_address, int port, int scan_type, int thread) {
     // for building headers
     char datagram[DATAGRAM_SIZE];
-    int i;
+    int i; // for any loops
     int retrans_num = 0; // do retransmission at most 3 times
     int if_retrans = 1; // if need to retransmit packet
     struct timeval start_time;
