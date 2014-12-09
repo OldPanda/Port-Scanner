@@ -5,7 +5,7 @@ Project Description
 ---
 This project is a basic implementation of port scanner, which helps network administrators to ensure machines in their network run in normal. 
 
-Basically, this port scanner can scan all ports of ip addresses given by user. By sending a proper packet to a port of a remote host, it can parse packets returned from that host which indicates the state of that port. Ip addresses are also needed during executing. The ip formats the port scanner can read are user input, ip file, and ip prefix. 
+Basically, this port scanner can scan all ports of ip addresses given by user. By sending a proper packet to a port of a remote host, it can parse packets returned from that host which indicates the state of that port. Ip addresses are also needed during executing. The ip formats the port scanner can read are user input(8.8.8.8), ip file(like [this](https://github.com/OldPanda/Port-Scanner/blob/master/ip_list.txt)), and ip prefix(8.8.8.8/20). 
 
 Scan Types
 ---
