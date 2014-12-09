@@ -258,6 +258,13 @@ void parse_args(ps_args_t *ps_args, int argc, char *argv[]) {
                 break;
         }
     }
+
+    // if there's no ip address
+    if (ps_args->ip_num == 0) {
+        printf("Lack of ip addresses. \n");
+        usage(stdout);
+        exit(0);
+    }
 /*
     // milestone1 test outputs
     printf("IP addresses: \n");
