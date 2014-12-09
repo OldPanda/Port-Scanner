@@ -340,7 +340,7 @@ results tcp_scan(char *ip_address, int port, int scan_type, int thread) {
                 } // end of recv_sock
                 else if (poll_set[1].revents & POLLIN) { // icmp packet
                     saddr_size = sizeof(source_addr);
-                    data_size = recvfrom(recv_sock, buffer, 65536, 0, &source_addr, &saddr_size);
+                    data_size = recvfrom(recv_sock, icmp_buffer, 65536, 0, &source_addr, &saddr_size);
 
                     if (data_size < 0) {
                         // printf("Recvfrom error, failed to get packets. Error num: %d. Error message: %s\n",
@@ -350,21 +350,14 @@ results tcp_scan(char *ip_address, int port, int scan_type, int thread) {
                         break;
                     }
 
-                    struct iphdr *iph = (struct iphdr*)buffer;
-                    // struct sockaddr_in source, dest;
+                    struct iphdr *iph = (struct iphdr*)icmp_buffer;
                     unsigned short iphdr_len;
 
                     iphdr_len = iph->ihl * 4;
-                    struct icmphdr *icmph = (struct icmphdr*)(buffer + iphdr_len);
-                    struct iphdr *ori_iph = (struct iphdr*)(buffer + iphdr_len + sizeof(struct icmphdr));
-                    struct tcphdr *ori_tcph = (struct tcphdr*)(buffer + iphdr_len + sizeof(struct icmphdr) + ori_iph->ihl * 4);
-/*
-                    memset(&source, 0, sizeof(source));
-                    source.sin_addr.s_addr = iph->saddr;
+                    struct icmphdr *icmph = (struct icmphdr*)(icmp_buffer + iphdr_len);
+                    struct iphdr *ori_iph = (struct iphdr*)(icmp_buffer + iphdr_len + sizeof(struct icmphdr));
+                    struct tcphdr *ori_tcph = (struct tcphdr*)(icmp_buffer + iphdr_len + sizeof(struct icmphdr) + ori_iph->ihl * 4);
 
-                    memset(&dest, 0, sizeof(dest));
-                    dest.sin_addr.s_addr = iph->daddr;
-*/
                     if ((ori_iph->daddr == dest_addr.sin_addr.s_addr) && (ntohs(ori_tcph->dest) == port) && (LOCAL_PORT == ntohs(ori_tcph->source))) {
                         if (icmph->type == 3 && (icmph->code == 1 ||
                                                  icmph->code == 2 ||
@@ -559,20 +552,13 @@ results udp_scan(char *ip_address, int port, int thread) {
                     }
 
                     struct iphdr *iph = (struct iphdr*)icmp_buffer;
-                    // struct sockaddr_in source, dest;
                     unsigned short iphdr_len;
 
                     iphdr_len = iph->ihl * 4;
                     struct icmphdr *icmph = (struct icmphdr*)(icmp_buffer + iphdr_len);
                     struct iphdr *ori_iph = (struct iphdr*)(icmp_buffer + iphdr_len + sizeof(struct icmphdr));
                     struct udphdr *ori_udph = (struct udphdr*)(icmp_buffer + iphdr_len + sizeof(struct icmphdr) + ori_iph->ihl * 4);
-/*
-                    memset(&source, 0, sizeof(source));
-                    source.sin_addr.s_addr = iph->saddr;
 
-                    memset(&dest, 0, sizeof(dest));
-                    dest.sin_addr.s_addr = iph->daddr;
-*/
                     if (ori_iph->daddr == dest_addr.sin_addr.s_addr && ntohs(ori_udph->dest) == port && LOCAL_PORT == ntohs(ori_udph->source)) {
                         if (icmph->type == 3 && (icmph->code == 1 ||
                                                  icmph->code == 2 ||
