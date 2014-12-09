@@ -53,7 +53,7 @@ Usage
 
 Example
 ---
-After executing `sudo --file ip_list.txt --ports 15,7,9,89,80 --scan UDP SYN --speedup 5`, the result of our code is 
+After executing `sudo ./portScanner --file ip_list.txt --ports 15,7,9,89,80 --scan UDP SYN --speedup 5`, the result of our code is 
 
 ```   
 Scanning...
