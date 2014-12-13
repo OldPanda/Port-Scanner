@@ -179,6 +179,8 @@ results tcp_scan(char *ip_address, int port, int scan_type, int thread) {
     memset(ser_result, 0, 64);
     results res;
 
+    memset(&res, 0, sizeof(results));
+
     strcpy(res.ip_address, ip_address);
     res.port = port;
     res.scan_type = scan_type;
@@ -443,6 +445,8 @@ results udp_scan(char *ip_address, int port, int thread) {
     memset(ser_result, 0, 128);
     results res;
 
+    memset(&res, 0, sizeof(results));
+
     strcpy(res.ip_address, ip_address);
     res.port = port;
     res.scan_type = UDP;
@@ -518,8 +522,8 @@ results udp_scan(char *ip_address, int port, int thread) {
     poll_set[1].fd = udp_recv_sock;
     poll_set[1].events = POLLIN | POLLERR;
 
-    icmp_buffer = (char *)calloc(65536, sizeof(char));
-    buffer = (unsigned char *)calloc(65536, sizeof(unsigned char));
+    icmp_buffer = (char *)malloc(65536 * sizeof(char));
+    buffer = (unsigned char *)malloc(65536 * sizeof(unsigned char));
 
     while (if_retrans) {
         if (sendto(sock, datagram , sizeof(struct iphdr) + sizeof(struct udphdr), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0) {
@@ -527,6 +531,9 @@ results udp_scan(char *ip_address, int port, int thread) {
             break;
         }
         gettimeofday(&start_time, NULL);
+
+        memset(icmp_buffer, 0, 65536);
+        memset(buffer, 0, 65536);
 
         while (1) {
             poll_res = poll(poll_set, numfds, TRANS_TIMEOUT * 1000);
