@@ -207,11 +207,6 @@ void _parse_scan(ps_args_t *ps_args, char *optarg) {
         else if (!strcmp(type, "UDP")) {
             ps_args->scan_types[UDP] = 1;
         }
-        else if (strlen(type) > 0){
-            printf("Invalid scan type. \n");
-            usage(stdout);
-            exit(-1);
-        }
         else {
             break;
         }
