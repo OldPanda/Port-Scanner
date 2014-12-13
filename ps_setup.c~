@@ -123,7 +123,8 @@ void _parse_ports(ps_args_t *ps_args, char *ports) {
 	}
     else {
         ps_args->ports[idx_1] = 1;
-   	}
+    }
+    printf("idx_1: %d\n", idx_1);
 }
 
 /*

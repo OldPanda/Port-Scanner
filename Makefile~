@@ -1,6 +1,6 @@
 CC=gcc
 LPCAP=-lpcap
-LPTHREAD=-pthread
+LPTHREAD=-lpthread
 
 SRC=portScanner.c ps_setup.c ps_lib.c
 OBJ=$(SRC:.c=.o)
