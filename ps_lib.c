@@ -201,7 +201,7 @@ results tcp_scan(char *ip_address, int port, int scan_type, int thread) {
     dest_addr.sin_port = htons(port);
     dest_addr.sin_addr.s_addr = inet_addr(ip_address);
 
-    // printf("\nIP address: %s. Port: %d. Thread: %d. Scan: %s\n", ip_address, port, thread, scan_name[scan_type]);
+    printf("\nIP address: %s. Port: %d. Thread: %d. Scan: %s\n", ip_address, port, thread, scan_name[scan_type]);
 
     // ip header
     struct iphdr *ip_header = (struct iphdr *)datagram;
@@ -466,7 +466,7 @@ results udp_scan(char *ip_address, int port, int thread) {
     dest_addr.sin_port = htons(port);
     dest_addr.sin_addr.s_addr = inet_addr(ip_address);
 
-    // printf("\nIP address: %s. Port: %d. Thread: %d. Scan: UDP\n", ip_address, port, thread);
+    printf("\nIP address: %s. Port: %d. Thread: %d. Scan: UDP\n", ip_address, port, thread);
 
     // ip header
     struct iphdr *ip_header = (struct iphdr *)datagram;
