@@ -530,11 +530,11 @@ results udp_scan(char *ip_address, int port, int thread) {
                 + (strlen((const char *)qname)) + 1 + sizeof(struct QUESTION);
         udp_header->len = htons(sizeof(struct udphdr) + sizeof(struct DNS_HEADER)
                 + (strlen((const char *)qname)) + 1 + sizeof(struct QUESTION));
-        printf("IP len: %d\n", ip_header->tot_len);
+        // printf("IP len: %d\n", ip_header->tot_len);
         // printf("dns header: %2X\n", dns_header);
-        printf("qname: %s\n", qname);
-        printf("qtype: %u\n", qinfo->qtype);
-        printf("qclass: %u\n", qinfo->qclass);
+        // printf("qname: %s\n", qname);
+        // printf("qtype: %u\n", qinfo->qtype);
+        // printf("qclass: %u\n", qinfo->qclass);
     }
 
     // IP_HDRINCL to tell the kernel that headers are included in the packet
