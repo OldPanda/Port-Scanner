@@ -5,28 +5,35 @@
  * get_local_ip(char *source_ip) -> void
  *
  * get local ip address as source ip in tcp or udp header.
- * http://stackoverflow.com/questions/212528/get-the-ip-address-of-the-machine
+ * www.binarytides.com/get-local-ip-c-linux/
  */
 void get_local_ip(char *source_ip) {
-    struct ifaddrs *if_addr_struct = NULL;
-    struct ifaddrs *ifa = NULL;
-    void *tmp_addr_ptr = NULL;
-
-    getifaddrs(&if_addr_struct);
-    for (ifa = if_addr_struct; ifa != NULL; ifa = ifa->ifa_next) {
-        if (!ifa->ifa_addr) {
-            continue;
-        }
-        if (ifa->ifa_addr->sa_family == AF_INET) {
-            if (!strcmp(ifa->ifa_name, "eth0")) {
-                tmp_addr_ptr = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
-                inet_ntop(AF_INET, tmp_addr_ptr, source_ip, INET_ADDRSTRLEN);
-            }
-        }
+    const char* google_dns_server = "8.8.8.8";
+    int dns_port = 53;
+     
+    struct sockaddr_in serv;
+     
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
+     
+    //Socket could not be created
+    if(sock < 0) {
+        perror("Socket error");
     }
+     
+    memset(&serv, 0, sizeof(serv));
+    serv.sin_family = AF_INET;
+    serv.sin_addr.s_addr = inet_addr(google_dns_server);
+    serv.sin_port = htons(dns_port);
+ 
+    int err = connect(sock, (const struct sockaddr*)&serv , sizeof(serv));
+     
+    struct sockaddr_in name;
+    socklen_t namelen = sizeof(name);
+    err = getsockname(sock, (struct sockaddr*) &name, &namelen);
+         
+    inet_ntop(AF_INET, &name.sin_addr, source_ip, 100);
 
-    if (if_addr_struct != NULL)
-        freeifaddrs(if_addr_struct);
+    close(sock);
 
     // printf("Source ip address: %s\n", source_ip);
 }
