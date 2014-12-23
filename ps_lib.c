@@ -124,13 +124,38 @@ void build_udp_header(struct udphdr *udp_header, int port) {
 }
 
 /*
+ * This will convert www.google.com to 3www6google3com
+ * got it :)
+ * */
+void ChangetoDnsNameFormat(unsigned char* dns,unsigned char* host)
+{
+    int lock = 0 , i;
+    strcat((char*)host,".");
+     
+    for(i = 0 ; i < strlen((char*)host) ; i++)
+    {
+        if(host[i]=='.')
+        {
+            *dns++ = i-lock;
+            for(;lock<i;lock++)
+            {
+                *dns++=host[lock];
+            }
+            lock++; //or lock=i+1;
+        }
+    }
+    *dns++='\0';
+}
+
+/*
  * build_dns_header() -> void
  *
  * build dns header when doing udp scan and port is 53
  * reference: http://www.binarytides.com/dns-query-code-in-c-with-linux-sockets/
  */
 void build_dns_header(struct DNS_HEADER *dns_header) {
-    dns_header->id = (unsigned short) htons(getpid());
+    dns_header->id = (unsigned short)htons(getpid());
+    /*
     dns_header->qr = 0; //This is a query
     dns_header->opcode = 0; //This is a standard query
     dns_header->aa = 0; //Not Authoritative
@@ -141,6 +166,8 @@ void build_dns_header(struct DNS_HEADER *dns_header) {
     dns_header->ad = 0;
     dns_header->cd = 0;
     dns_header->rcode = 0;
+    */
+    dns_header->flag = htons(0x0100);
     dns_header->q_count = htons(1);
     dns_header->ans_count = 0;
     dns_header->auth_count = 0;
@@ -475,10 +502,35 @@ results udp_scan(char *ip_address, int port, int thread) {
     build_udp_header(udp_header, port);
 
     // build dns header if port is 53
+    unsigned char *qname;
     if (port == 53) {
         struct DNS_HEADER *dns_header = (struct DNS_HEADER *)(datagram
                                         + sizeof(struct iphdr) + sizeof(struct udphdr));
         build_dns_header(dns_header);
+
+        qname = (unsigned char *)(datagram + sizeof(struct iphdr) 
+                + sizeof(struct udphdr) 
+                + sizeof(struct DNS_HEADER));
+        unsigned char host[20] = "www.google.com";
+        ChangetoDnsNameFormat(qname, host);
+        // memcpy(qname, "3www6google3com\0", 16);
+        
+        struct QUESTION *qinfo = (struct QUESTION *)(datagram + sizeof(struct iphdr) + sizeof(struct udphdr)
+                + sizeof(struct DNS_HEADER)
+                + (strlen((const char *)qname)) + 1);
+        qinfo->qtype = htons(1); // type A
+        qinfo->qclass = htons(1); // IN
+
+        ip_header->tot_len = sizeof(struct iphdr) + sizeof(struct udphdr) 
+                + sizeof(struct DNS_HEADER)
+                + (strlen((const char *)qname)) + 1 + sizeof(struct QUESTION);
+        udp_header->len = htons(sizeof(struct udphdr) + sizeof(struct DNS_HEADER)
+                + (strlen((const char *)qname)) + 1 + sizeof(struct QUESTION));
+        printf("IP len: %d\n", ip_header->tot_len);
+        // printf("dns header: %2X\n", dns_header);
+        printf("qname: %s\n", qname);
+        printf("qtype: %u\n", qinfo->qtype);
+        printf("qclass: %u\n", qinfo->qclass);
     }
 
     // IP_HDRINCL to tell the kernel that headers are included in the packet
@@ -495,7 +547,14 @@ results udp_scan(char *ip_address, int port, int thread) {
     pseudo_header.dest_address = dest_addr.sin_addr.s_addr;
     pseudo_header.reserved = 0;
     pseudo_header.protocol = IPPROTO_UDP;
-    pseudo_header.length = htons(sizeof(struct udphdr));
+    
+    if (port == 53) {
+        pseudo_header.length = htons(sizeof(struct udphdr) + sizeof(struct DNS_HEADER)
+                + (strlen((const char *)qname)) + 1 + sizeof(struct QUESTION));
+    }
+    else {
+        pseudo_header.length = htons(sizeof(struct udphdr));
+    }
     memcpy(&pseudo_header.udp, udp_header, sizeof(struct udphdr));
 
     udp_header->check = cal_checksum((unsigned short*)&pseudo_header, sizeof(struct udp_pseudo_hdr));
@@ -522,7 +581,7 @@ results udp_scan(char *ip_address, int port, int thread) {
     buffer = (unsigned char *)calloc(65536, sizeof(unsigned char));
 
     while (if_retrans) {
-        if (sendto(sock, datagram , sizeof(struct iphdr) + sizeof(struct udphdr), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0) {
+        if (sendto(sock, datagram, ip_header->tot_len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0) {
             // printf("Error sending udp packet. Error number: %d. Error message: %s\n", errno, strerror(errno));
             break;
         }

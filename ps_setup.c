@@ -226,6 +226,13 @@ void _parse_prefix(ps_args_t *ps_args, char *optarg) {
     // split input string into two parts: ip address and fixed length
     char *ip_temp = strtok(optarg, "/");
     char *match = strtok(NULL, "/");
+
+    if (atoi(match) < 0 || atoi(match) > 32) {
+        printf("Invalid prefix length. \n");
+        usage(stdout);
+        exit(-1);
+    }
+
     int padding = 32 - atoi(match);
     int padding_max = 1;
     u_int32_t pattern = 0xffffffff;
