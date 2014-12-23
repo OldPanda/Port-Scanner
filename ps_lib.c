@@ -206,6 +206,8 @@ results tcp_scan(char *ip_address, int port, int scan_type, int thread) {
     memset(ser_result, 0, 64);
     results res;
 
+    memset(&res, 0, sizeof(results));
+
     strcpy(res.ip_address, ip_address);
     res.port = port;
     res.scan_type = scan_type;
@@ -226,7 +228,7 @@ results tcp_scan(char *ip_address, int port, int scan_type, int thread) {
     dest_addr.sin_port = htons(port);
     dest_addr.sin_addr.s_addr = inet_addr(ip_address);
 
-    // printf("\nIP address: %s. Port: %d. Thread: %d. Scan: %s\n", ip_address, port, thread, scan_name[scan_type]);
+    printf("\nIP address: %s. Port: %d. Thread: %d. Scan: %s\n", ip_address, port, thread, scan_name[scan_type]);
 
     // ip header
     struct iphdr *ip_header = (struct iphdr *)datagram;
@@ -470,6 +472,8 @@ results udp_scan(char *ip_address, int port, int thread) {
     memset(ser_result, 0, 128);
     results res;
 
+    memset(&res, 0, sizeof(results));
+
     strcpy(res.ip_address, ip_address);
     res.port = port;
     res.scan_type = UDP;
@@ -489,7 +493,7 @@ results udp_scan(char *ip_address, int port, int thread) {
     dest_addr.sin_port = htons(port);
     dest_addr.sin_addr.s_addr = inet_addr(ip_address);
 
-    // printf("\nIP address: %s. Port: %d. Thread: %d. Scan: UDP\n", ip_address, port, thread);
+    printf("\nIP address: %s. Port: %d. Thread: %d. Scan: UDP\n", ip_address, port, thread);
 
     // ip header
     struct iphdr *ip_header = (struct iphdr *)datagram;
@@ -577,8 +581,8 @@ results udp_scan(char *ip_address, int port, int thread) {
     poll_set[1].fd = udp_recv_sock;
     poll_set[1].events = POLLIN | POLLERR;
 
-    icmp_buffer = (char *)calloc(65536, sizeof(char));
-    buffer = (unsigned char *)calloc(65536, sizeof(unsigned char));
+    icmp_buffer = (char *)malloc(65536 * sizeof(char));
+    buffer = (unsigned char *)malloc(65536 * sizeof(unsigned char));
 
     while (if_retrans) {
         if (sendto(sock, datagram, ip_header->tot_len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0) {
@@ -586,6 +590,9 @@ results udp_scan(char *ip_address, int port, int thread) {
             break;
         }
         gettimeofday(&start_time, NULL);
+
+        memset(icmp_buffer, 0, 65536);
+        memset(buffer, 0, 65536);
 
         while (1) {
             poll_res = poll(poll_set, numfds, TRANS_TIMEOUT * 1000);

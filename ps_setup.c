@@ -42,24 +42,24 @@ void _parse_ports(ps_args_t *ps_args, char *ports) {
             idx_1 = idx_1 + ports[i] - '0';
         }
         else if (ports[i] == ',') {
-        	if (idx_1 == 0) {
-        		// port number is zero
-        		printf("Number 0 is a not valid port. \n");
-        		usage(stdout);
-        		exit(-1);
-        	}
-        	else if (idx_1 > 65536) {
-        		// too large 
-        		printf("Port number is too large. \n");
-        		usage(stdout);
-        		exit(-1);
-        	}
+            if (idx_1 == 0) {
+            	// port number is zero
+            	printf("Number 0 is a not valid port. \n");
+            	usage(stdout);
+            	exit(-1);
+            }
+            else if (idx_1 > 65536) {
+            	// too large 
+            	printf("Port number is too large. \n");
+            	usage(stdout);
+            	exit(-1);
+            }
         	single_flag = 0;
             ps_args->ports[idx_1] = 1;
             idx_1 = 0;
         }
         else if (ports[i] == '-') {
-        	if (idx_1 == 0 || ports[i + 1] == '-') {
+        	if (ports[i + 1] == '-') {
 				// negative number
 				printf("Invalid port number. \n");
 				usage(stdout);
@@ -68,6 +68,7 @@ void _parse_ports(ps_args_t *ps_args, char *ports) {
 			
             i++;
             int j;
+            // parse second number
             while (i < length && ports[i] >= '0' && ports[i] <= '9') {
                 idx_2 *= 10;
                 idx_2 = idx_2 + ports[i] - '0';
@@ -236,6 +237,12 @@ void _parse_prefix(ps_args_t *ps_args, char *optarg) {
     int padding = 32 - atoi(match);
     int padding_max = 1;
     u_int32_t pattern = 0xffffffff;
+
+    if (atoi(match) < 0 || atoi(match) > 32) {
+        printf("Invalid prefix number. \n");
+        usage(stdout);
+        exit(-1);
+    }
 
     // set the bit of fixed position to be 1, others to be 0
     // and determine how many ip addresses we need to deal with
